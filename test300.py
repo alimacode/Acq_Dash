@@ -3,27 +3,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-css='''
-<style>
-    .stButton > button {
-       width: 100%;
-       background-color: #0A5EC0;
-       color: white;
-         border: 1px solid #fff;
-        border-radius: 20px;
-    }
-    .stButton > button:hover {
-       background-color: #0E4594;
-       color: white;
-    }
-    [data-testid=stDecoration]{
-        background-image: linear-gradient(90deg, rgb(26, 117, 209), rgb(206, 230, 255));
-    }
-  [data-testid=stForm]{
-        border-color:#f0f2f6;
-    }
-</style>
-'''
+
+<link rel="stylesheet" type="text/css" href="style.css">
 
 #possible features:
 #error handling
