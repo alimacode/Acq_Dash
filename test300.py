@@ -13,9 +13,11 @@ import numpy as np
 #df.to_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 #df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
-df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
+#df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 
 #df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
+
+df=pd.read_parquet(r"Data - Copy.parquet")
 
 #Replace any NaN values with a string "None"
 #Graph won't render otherwise
