@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
+
 #possible features:
 #error handling
 #conditional rendering/disabling/enabling certain buttons
@@ -13,11 +14,9 @@ import numpy as np
 #df.to_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 #df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
-#df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
+df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 
 #df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
-
-df=pd.read_parquet(r"Data - Copy.parquet")
 
 #Replace any NaN values with a string "None"
 #Graph won't render otherwise
@@ -92,6 +91,8 @@ if "added_df" not in st.session_state:
 if "isDfAdded" not in st.session_state:
     st.session_state['isDfAdded'] = False
 
+if 'add_counter' not in st.session_state:
+     st.session_state['add_counter'] = 1
 
 def add_to_main():
     if add:
@@ -104,6 +105,12 @@ def add_to_main():
                         & (df['Association'] == selected_association)
                         & (df['AnnualFeeGroup'] == selected_annualfeegroup)
                         & (df['OriginalCreditLineRange'] == selected_originalcreditlinerange)]
+        unique_id =f"{selected_vintage} {st.session_state['add_counter']}" 
+        st.session_state['add_counter'] += 1
+        df_add['Vintage'] = unique_id
+
+        if 'add_counter' not in st.session_state:
+            st.session_state['add_counter'] = 1
         #IF THE ADDED DF IS EMPTY
         #User has not yet added another dataframe to the initial dataframe, this runs if the Add button is hit for the First time
         if st.session_state['added_df'].empty == True:
@@ -172,4 +179,3 @@ elif st.session_state['added_df'].empty == False and st.session_state['isDfAdded
     fig3d = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['EndingReceivable'],
                     color=st.session_state['added_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
     st.plotly_chart(fig3d)
-
