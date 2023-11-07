@@ -14,8 +14,8 @@ import numpy as np
 #df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
 #df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.parquet")
-df=pd.read_csv(r"Data_Test.csv")
-
+#df=pd.read_csv(r"Data_Test.csv")
+df=pd.read_parquet(r"Data - Copy.parquet")
 #df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
 
 #Replace any NaN values with a string "None"
