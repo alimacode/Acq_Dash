@@ -64,9 +64,11 @@ with st.sidebar:
         clist7 = filtered_df_annualfeegroup['OriginalCreditLineRange'].unique()
         selected_originalcreditlinerange = st.selectbox("Select OriginalCreditLineRange:", clist7, key="selected_originalcreditlinerange")
         filtered_df_originalcreditlinerange = filtered_df_annualfeegroup[filtered_df_annualfeegroup['OriginalCreditLineRange'] == selected_originalcreditlinerange]
-        with st.form('my_form'):
+         with st.form('my_form'):
+            col1, col2, col3 = st.columns([1,2,1])
             #submit = st.form_submit_button('Submit')
-            add = st.form_submit_button('Add') 
+            with col2:
+                add = st.form_submit_button('Add')
 
 # initialize blank dataframe to hold First df created from user filters
 if 'blank_df' not in st.session_state:
