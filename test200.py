@@ -58,21 +58,21 @@ if "added_df" not in st.session_state:
 if "isDfAdded" not in st.session_state:
     st.session_state['isDfAdded'] = False
 
-def main():
-    if submit:
+#def main():
+    #if submit:
         # filter from original df using selected values
         # create a new filtered df from the entire df
-        df_new = df.loc[(df['Vintage'] == selected)
-                        & (df['FirstSecond'] == FirstSecond)
-                        & (df['Branding'] == Branding)
-                        & (df['Channel'] == Channel)
-                        & (df['Source'] == Source)
-                        & (df['Association'] == Association)
-                        & (df['AnnualFeeGroup'] == AnnualFeeGroup)
-                        & (df['OriginalCreditLineRange'] == OriginalCreditLineRange)]
+        #df_new = df.loc[(df['Vintage'] == selected)
+                        #& (df['FirstSecond'] == FirstSecond)
+                        #& (df['Branding'] == Branding)
+                        #& (df['Channel'] == Channel)
+                        #& (df['Source'] == Source)
+                        #& (df['Association'] == Association)
+                        #& (df['AnnualFeeGroup'] == AnnualFeeGroup)
+                        #& (df['OriginalCreditLineRange'] == OriginalCreditLineRange)]
         # store this new df into df made earlier
-        st.session_state['blank_df'] = pd.concat(
-            [st.session_state['blank_df'], df_new], axis=0)
+        #st.session_state['blank_df'] = pd.concat(
+            #[st.session_state['blank_df'], df_new], axis=0)
 
 def add_to_main():
     if add:
@@ -112,11 +112,11 @@ with st.form('my_form'):
         AnnualFeeGroup = st.selectbox("AnnualFeeGroup", clist6)
         OriginalCreditLineRange = st.selectbox(
             "OriginalCreditLineRange", clist7)
-        submit = st.form_submit_button('Submit')
+        #submit = st.form_submit_button('Submit')
         add = st.form_submit_button('Add') 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+    #main()
 
 if __name__ == "__main__":
     add_to_main()
