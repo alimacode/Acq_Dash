@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
-<link rel="stylesheet" type="text/css" href="https://github.com/alimacode/Acq_Dash/blob/a29cdb0a8c24a94def591940adec5306668ea4c2/style.css">
+<link rel="stylesheet" type="text/css" href="style.css">
 
 #possible features:
 #error handling
