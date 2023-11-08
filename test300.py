@@ -3,9 +3,30 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+from io import StringIO
 
-<link rel="stylesheet" type="text/css" href="style.css"/>
-
+css='''
+<style>
+    .stButton > button {
+       width: 100%;
+       background-color: #0A5EC0;
+       color: white;
+         border: 1px solid #fff;
+        border-radius: 20px;
+    }
+    .stButton > button:hover {
+       background-color: #0E4594;
+       color: white;
+    }
+    [data-testid=stDecoration]{
+        background-image: linear-gradient(90deg, rgb(26, 117, 209), rgb(206, 230, 255));
+    }
+  [data-testid=stForm]{
+        border-color:#f0f2f6;
+    }
+</style>
+'''
+st.markdown(css, unsafe_allow_html=True)
 #possible features:
 #error handling
 #conditional rendering/disabling/enabling certain buttons
@@ -15,8 +36,8 @@ import numpy as np
 #df.to_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 #df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
-#df=pd.read_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 df=pd.read_parquet(r"Data - Copy.parquet")
+
 #df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
 
 #Replace any NaN values with a string "None"
@@ -33,7 +54,6 @@ with st.sidebar:
         st.header('Filters')
         selected_vintage = st.selectbox("Select Vintage:", clist, key="selected_vintage")
          #filter df based on selected vintage
-        
         
         filtered_df = df[df['Vintage'] == selected_vintage]
 
@@ -67,8 +87,10 @@ with st.sidebar:
         with st.form('my_form'):
             col1, col2, col3 = st.columns([1,2,1])
             #submit = st.form_submit_button('Submit')
-            with col2:
+            with col1:
                 add = st.form_submit_button('Add')
+            with col2:
+                clear = st.form_submit_button('Clear All')
 
 # initialize blank dataframe to hold First df created from user filters
 if 'blank_df' not in st.session_state:
@@ -124,14 +146,24 @@ def add_to_main():
                 [st.session_state['added_df'], df_add], axis=0)
         st.session_state['isDfAdded'] = True
 
-
-
-#if __name__ == "__main__":
-    #main()
-
+def clear_from_main():
+        if clear:
+            df_clear = df.loc[(df['Vintage'] == None)
+                                    & (df['FirstSecond'] == None)
+                                    & (df['Branding'] == None)
+                                    & (df['Channel'] == None)
+                                    & (df['Source'] == None)
+                                    & (df['Association'] == None)
+                                    & (df['AnnualFeeGroup'] == None)
+                                    & (df['OriginalCreditLineRange'] == None)]
+            st.session_state['added_df'] = pd.concat([st.session_state['blank_df'], df_clear], axis=0)
+             
 if __name__ == "__main__":
     add_to_main()
-    
+
+if __name__ == "__main__":
+    clear_from_main()
+
 #ENTIRE DF AND ALL PLOT LINES ON LOAD, this is default case
 #if st.session_state['blank_df'].empty == True:
     #st.write(df)
@@ -148,9 +180,13 @@ if __name__ == "__main__":
     #fig1d = #px.line(df.melt(id_vars="Vintage"), x=df['MonthsOnBooks'], y=df['EndingReceivable'], color=df['Vintage'],
                     #markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
     #st.plotly_chart(fig1d)
+
+
+
+
 #THE FIRST FILTERED DF WILL DISPLAY, this case happens on first click of "Display Vintage"
 if st.session_state['blank_df'].empty == False and st.session_state['isDfAdded'] == False:
-    st.dataframe(st.session_state['blank_df'])
+    
     fig2a = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['ActiveAccountIndicator'],
                     color=st.session_state['blank_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
     st.plotly_chart(fig2a)
@@ -164,9 +200,10 @@ if st.session_state['blank_df'].empty == False and st.session_state['isDfAdded']
     fig2d = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['EndingReceivable'],
                     color=st.session_state['blank_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
     st.plotly_chart(fig2d)
+    st.dataframe(st.session_state['blank_df'])
 #THE ADDED VINTAGES WILL DISPLAY, this case happens after n clicks of "Add a Vintage"
 elif st.session_state['added_df'].empty == False and st.session_state['isDfAdded'] == True:
-    st.dataframe(st.session_state['added_df'])
+    
     fig3a = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['ActiveAccountIndicator'],
                     color=st.session_state['added_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
     st.plotly_chart(fig3a)
@@ -180,3 +217,19 @@ elif st.session_state['added_df'].empty == False and st.session_state['isDfAdded
     fig3d = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['EndingReceivable'],
                     color=st.session_state['added_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
     st.plotly_chart(fig3d)
+    st.dataframe(st.session_state['added_df'])
+
+
+def convert_df_to_csv(df):
+    output = StringIO()
+    df.to_csv(output, index=False)
+    return output.getvalue()
+
+if not st.session_state['added_df'].empty:
+        csv = convert_df_to_csv(st.session_state['added_df'])
+        st.download_button(
+             label="Download data as CSV",
+             data=csv,
+             file_name='vintage_data.csv',
+                     mime='text/csv',
+        )
