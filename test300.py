@@ -36,7 +36,7 @@ st.markdown(css, unsafe_allow_html=True)
 #df.to_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
 #df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
-df=pd.read_parquet(r"Data - Copy.parquet")
+df=pd.read_parquet(r"Data3 - Copy.parquet")
 
 #df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
 
