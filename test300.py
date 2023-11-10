@@ -27,29 +27,21 @@ css='''
 </style>
 '''
 st.markdown(css, unsafe_allow_html=True)
-#possible features:
-#error handling
-#conditional rendering/disabling/enabling certain buttons
-#clear functionality or reset to default
-
-#df=pd.read_csv(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.csv")
-#df.to_parquet(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data3.parquet")
-#df.to_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", key='data', mode='w')
 
 df=pd.read_parquet(r"Data3 - Copy.parquet")
-
-#df = pd.read_hdf(r"\\fnbmcorp\share\Risk\Enterprise Risk\PortfolioManagement\VintageComparisonGraphs\Data\Data2.h5", "data")
 
 #Replace any NaN values with a string "None"
 #Graph won't render otherwise
 dfFixNone = df.replace(np.nan, 'None')
 df= dfFixNone
 
+col4, col5= st.columns([0.7, 0.3], gap="Medium")
 #Unique list for Vintage
 clist = df['Vintage'].unique()
 
-st.header("Vintage Comparison")
-#options = st.multiselect("Select vintages:", clist, key="vintages_selected")
+col4.header("Vintage Comparison")
+col4.write("select a vintage from the sidebar and click add")
+
 with st.sidebar:
         st.header('Filters')
         selected_vintage = st.selectbox("Select Vintage:", clist, key="selected_vintage")
@@ -92,6 +84,7 @@ with st.sidebar:
             with col2:
                 clear = st.form_submit_button('Clear All')
 
+
 # initialize blank dataframe to hold First df created from user filters
 if 'blank_df' not in st.session_state:
     st.session_state['blank_df'] = pd.DataFrame(columns=[
@@ -117,6 +110,10 @@ if "isDfAdded" not in st.session_state:
 if 'add_counter' not in st.session_state:
      st.session_state['add_counter'] = 1
 
+if 'selected_vintages_list' not in st.session_state:
+    st.session_state.selected_vintages_list = []
+
+
 def add_to_main():
     if add:
         # create a new filtered df from the entire df
@@ -132,6 +129,8 @@ def add_to_main():
         st.session_state['add_counter'] += 1
         df_add['Vintage'] = unique_id
 
+        st.session_state.selected_vintages_list.append(unique_id)
+
         if 'add_counter' not in st.session_state:
             st.session_state['add_counter'] = 1
         #IF THE ADDED DF IS EMPTY
@@ -146,6 +145,19 @@ def add_to_main():
                 [st.session_state['added_df'], df_add], axis=0)
         st.session_state['isDfAdded'] = True
 
+def remove_selected_vintage(vintage_to_remove):
+   
+     if f"{vintage_to_remove}" in st.session_state['added_df']['Vintage'].values:
+          df = st.session_state['added_df'].drop(st.session_state['added_df'][st.session_state['added_df']['Vintage'] ==  f"{vintage_to_remove}"].index)
+        #   st.session_state['added_df'] = st.session_state['added_df'][st.session_state['added_df']['Vintage'] != vintage_to_remove]
+          st.session_state['added_df'] = df
+          st.session_state['isDfAdded'] = not st.session_state['added_df'].empty
+          st.session_state.selected_vintages_list.remove(vintage_to_remove)
+          if st.session_state['added_df'].empty:
+               st.session_state['isDfAdded'] = False
+          st.experimental_rerun()
+          
+
 def clear_from_main():
         if clear:
             df_clear = df.loc[(df['Vintage'] == None)
@@ -157,69 +169,55 @@ def clear_from_main():
                                     & (df['AnnualFeeGroup'] == None)
                                     & (df['OriginalCreditLineRange'] == None)]
             st.session_state['added_df'] = pd.concat([st.session_state['blank_df'], df_clear], axis=0)
-             
+
+
 if __name__ == "__main__":
     add_to_main()
-
-if __name__ == "__main__":
     clear_from_main()
 
-#ENTIRE DF AND ALL PLOT LINES ON LOAD, this is default case
-#if st.session_state['blank_df'].empty == True:
-    #st.write(df)
-    #fig1a = px.line(df.melt(id_vars="Vintage"), x=df['MonthsOnBooks'], y=df['ActiveAccountIndicator'], color=df['Vintage'],
-                    #markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
-    #st.plotly_chart(fig1a)
-    #fig1b = px.line(df.melt(id_vars="Vintage"), x=df['MonthsOnBooks'], y=df['CumlROAAnnualized'], color=df['Vintage'],
-                    #markers=True, title='CumlROAAnnualized', labels={'y': 'ROAAnnualized', 'x': 'Months on Book', "color": "Vintage"})
-    #fig1b.update_layout(yaxis_ticksuffix=".3%")
-    #st.plotly_chart(fig1b)
-    #fig1c = px.line(df.melt(id_vars="Vintage"), x=df['MonthsOnBooks'], y=df['CumlPreTaxIncome'], color=df['Vintage'],
-                    #markers=True, title='CumlPreTaxIncome', labels={'y': 'PreTaxIncome', 'x': 'Months on Book', "color": "Vintage"})
-    #st.plotly_chart(fig1c)
-    #fig1d = #px.line(df.melt(id_vars="Vintage"), x=df['MonthsOnBooks'], y=df['EndingReceivable'], color=df['Vintage'],
-                    #markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
-    #st.plotly_chart(fig1d)
 
 
+for i, vintage in enumerate(st.session_state.selected_vintages_list):
+     if col5.button(f"Remove {vintage}", key=f"remove_{i}"):
+        #st.session_state.selected_vintages_list.pop(i)
+        remove_selected_vintage(vintage)
 
 
 #THE FIRST FILTERED DF WILL DISPLAY, this case happens on first click of "Display Vintage"
 if st.session_state['blank_df'].empty == False and st.session_state['isDfAdded'] == False:
-    
-    fig2a = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['ActiveAccountIndicator'],
-                    color=st.session_state['blank_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig2a)
-    fig2b = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['CumlROAAnnualized'],
-                    color=st.session_state['blank_df']['Vintage'], markers=True, title='CumlROAAnnualized', labels={'y': 'ROAAnnualized', 'x': 'Months on Book', "color": "Vintage"})
-    fig2b.update_layout(yaxis_ticksuffix=".3%")
-    st.plotly_chart(fig2b)
-    fig2c = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['CumlPreTaxIncome'],
-                    color=st.session_state['blank_df']['Vintage'], markers=True, title='CumlPreTaxIncome', labels={'y': 'PreTaxIncome', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig2c)
-    fig2d = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['EndingReceivable'],
-                    color=st.session_state['blank_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig2d)
-    st.dataframe(st.session_state['blank_df'])
+        
+        fig2a = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['ActiveAccountIndicator'],
+                        color=st.session_state['blank_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig2a)
+        fig2b = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['CumlROAAnnualized'],
+                        color=st.session_state['blank_df']['Vintage'], markers=True, title='CumlROAAnnualized', labels={'y': 'ROAAnnualized', 'x': 'Months on Book', "color": "Vintage"})
+        fig2b.update_layout(yaxis_ticksuffix=".3%")
+        st.plotly_chart(fig2b)
+        fig2c = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['CumlPreTaxIncome'],
+                        color=st.session_state['blank_df']['Vintage'], markers=True, title='CumlPreTaxIncome', labels={'y': 'PreTaxIncome', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig2c)
+        fig2d = px.line(st.session_state['blank_df'].melt(id_vars="Vintage"), x=st.session_state['blank_df']['MonthsOnBooks'], y=st.session_state['blank_df']['EndingReceivable'],
+                        color=st.session_state['blank_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig2d)
+        st.dataframe(st.session_state['blank_df'])
 #THE ADDED VINTAGES WILL DISPLAY, this case happens after n clicks of "Add a Vintage"
 elif st.session_state['added_df'].empty == False and st.session_state['isDfAdded'] == True:
+        
+        fig3a = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['ActiveAccountIndicator'],
+                        color=st.session_state['added_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig3a)
+        fig3b = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['CumlROAAnnualized'],
+                        color=st.session_state['added_df']['Vintage'], markers=True, title='CumlROAAnnualized', labels={'y': 'ROAAnnualized', 'x': 'Months on Book', "color": "Vintage"})
+        fig3b.update_layout(yaxis_ticksuffix=".3%")
+        st.plotly_chart(fig3b)
+        fig3c = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['CumlPreTaxIncome'],
+                        color=st.session_state['added_df']['Vintage'], markers=True, title='CumlPreTaxIncome', labels={'y': 'PreTaxIncome', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig3c)
+        fig3d = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['EndingReceivable'],
+                        color=st.session_state['added_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
+        st.plotly_chart(fig3d)
+        st.dataframe(st.session_state['added_df'])
     
-    fig3a = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['ActiveAccountIndicator'],
-                    color=st.session_state['added_df']['Vintage'], markers=True, title='Active Accounts', labels={'y': 'Active Accounts', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig3a)
-    fig3b = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['CumlROAAnnualized'],
-                    color=st.session_state['added_df']['Vintage'], markers=True, title='CumlROAAnnualized', labels={'y': 'ROAAnnualized', 'x': 'Months on Book', "color": "Vintage"})
-    fig3b.update_layout(yaxis_ticksuffix=".3%")
-    st.plotly_chart(fig3b)
-    fig3c = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['CumlPreTaxIncome'],
-                    color=st.session_state['added_df']['Vintage'], markers=True, title='CumlPreTaxIncome', labels={'y': 'PreTaxIncome', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig3c)
-    fig3d = px.line(st.session_state['added_df'].melt(id_vars="Vintage"), x=st.session_state['added_df']['MonthsOnBooks'], y=st.session_state['added_df']['EndingReceivable'],
-                    color=st.session_state['added_df']['Vintage'], markers=True, title='EndingReceivable', labels={'y': 'EndingReceivable', 'x': 'Months on Book', "color": "Vintage"})
-    st.plotly_chart(fig3d)
-    st.dataframe(st.session_state['added_df'])
-
-
 def convert_df_to_csv(df):
     output = StringIO()
     df.to_csv(output, index=False)
@@ -233,3 +231,8 @@ if not st.session_state['added_df'].empty:
              file_name='vintage_data.csv',
                      mime='text/csv',
         )
+
+
+
+
+
