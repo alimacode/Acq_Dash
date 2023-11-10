@@ -160,6 +160,7 @@ def remove_selected_vintage(vintage_to_remove):
 
 def clear_from_main():
         if clear:
+            st.session_state.selected_vintages_list.clear()
             df_clear = df.loc[(df['Vintage'] == None)
                                     & (df['FirstSecond'] == None)
                                     & (df['Branding'] == None)
